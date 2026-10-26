@@ -154,12 +154,21 @@ export const zoomAt = (t: number, zooms: Zoom[]): { k: number; origin: string } 
     if (push) {
       const e = Math.min(Math.max(PUSH_MIN_S, z.ease_s), (z.end - z.start) / 2);
       const f = ease(z.ease ?? PUSH_EASE);
-      p = t < z.start + e ? f((t - z.start) / e) : t > z.end - e ? f((z.end - t) / e) : 1;
+      const inHold = t >= z.start + e && t <= z.end - e;
+      const holdDur = Math.max(0.01, z.end - z.start - 2 * e);
+      const holdProgress = inHold ? Math.max(0, Math.min(1, (t - (z.start + e)) / holdDur)) : 0;
+      const drift = holdProgress * 0.035;
+      p = t < z.start + e ? f((t - z.start) / e) : t > z.end - e ? f((z.end - t) / e) : 1 + drift;
     } else {
-      const f = ease(z.ease && z.ease !== "none" ? z.ease : PUNCH_EASE);
-      p = t < z.end ? f(Math.min(1, (t - z.start) / travel)) : 1 - f(Math.min(1, (t - z.end) / travel));
+      const smoothTravel = Math.max(0.28, travel);
+      const f = ease(z.ease && z.ease !== "none" ? z.ease : "power2.out");
+      const inHold = t >= z.start + smoothTravel && t <= z.end;
+      const holdDur = Math.max(0.01, z.end - (z.start + smoothTravel));
+      const holdProgress = inHold ? Math.max(0, Math.min(1, (t - (z.start + smoothTravel)) / holdDur)) : 0;
+      const drift = holdProgress * 0.03;
+      p = t < z.end ? Math.min(1, f(Math.min(1, (t - z.start) / smoothTravel)) + drift) : 1 - f(Math.min(1, (t - z.end) / smoothTravel));
     }
-    return { k: Math.pow(z.scale, Math.max(0, Math.min(1, p))), origin };
+    return { k: Math.pow(z.scale, Math.max(0, Math.min(1.05, p))), origin };
   }
   return { k: 1, origin: ZOOM_ORIGIN };
 };

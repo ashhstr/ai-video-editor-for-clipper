@@ -130,14 +130,18 @@ export const CaptionLine: React.FC<{ style: CaptionStyle; chunk: Chunk; t: numbe
           const textColor = fx === "karaoke" ? undefined : on && !pill && fx !== "reveal" && fx !== "none" ? hi : base;
           const stroke = pill ? undefined : style.stroke ? `${Math.max(2, size * 0.1)}px #000`
             : tr === "stroke" || tr === "backing" ? `${Math.max(2, size * 0.1)}px ${tc}` : undefined;
+          const emphShadow = w.emph
+            ? `0 0 ${size * 0.35}px rgba(245, 158, 11, 0.75), 0 ${size * 0.04}px ${size * 0.18}px rgba(0,0,0,0.9)`
+            : shadow;
+          const emphScale = w.emph ? (on ? sc * 1.15 : sc * 1.05) : sc;
           return (
             <React.Fragment key={i}>
               {i ? (breaks.has(i) ? <br /> : " ") : null}
-              <span style={{ display: "inline-block", position: "relative", transform: `translateY(${-lift * a + (1 - rev) * size * 0.35}px) scale(${sc})`,
-                margin: `0 ${(sc - 1) * 0.5 * size * Math.max(1, w.text.length * 0.5)}px`,
+              <span style={{ display: "inline-block", position: "relative", transform: `translateY(${-lift * a + (1 - rev) * size * 0.35}px) scale(${emphScale})`,
+                margin: `0 ${(emphScale - 1) * 0.5 * size * Math.max(1, w.text.length * 0.5)}px`,
                 opacity: op, color: textColor ?? base, fontWeight: w.emph ? heavy : weight, fontSize: i === bi ? bigSize : undefined,
                 lineHeight: i === bi ? 1.0 : undefined, WebkitTextStroke: stroke, paintOrder: "stroke fill",
-                textShadow: shadow }}>
+                textShadow: emphShadow }}>
                 {pill ? <span style={{ position: "absolute", left: -size * 0.12, right: -size * 0.12,
                   top: size * 0.02, bottom: 0, background: hi, borderRadius: size * 0.16, transform: `scale(${0.6 + 0.4 * pillP})`, opacity: pillP, zIndex: -1 }} /> : null}
                 <span style={{ position: "relative", color: pill ? "#111" : undefined, WebkitTextStroke: pill ? "0px" : undefined }}>{w.text}</span>
@@ -160,9 +164,9 @@ export const Captions: React.FC<{ style: CaptionStyle; chunks: Chunk[]; t: numbe
   const lightFamily = useFamily(style.light_font ?? style.font_match, 400);
   const chunk = chunks.find((c) => t >= c.start && t < c.end);
   // the band stays down across a short gap between pages, so it never flashes on and off between words
-  // the nearest page, not the first in range: an earlier page about to drop out would fade the band for a frame
+  // hold previous chunk across micro pauses (up to 0.35s) so captions never fail to appear
   const gap = (c: Chunk) => Math.max(c.start - t, t - c.end);
-  const near = chunk ?? chunks.filter((c) => c.treat === "band" && t >= c.start - BAND_HOLD_S && t < c.end + BAND_HOLD_S)
+  const near = chunk ?? chunks.find((c) => t >= c.start && t < c.end + 0.35) ?? chunks.filter((c) => c.treat === "band" && t >= c.start - BAND_HOLD_S && t < c.end + BAND_HOLD_S)
     .sort((a, b) => gap(a) - gap(b))[0];
   if (!family || !lightFamily || !near || style.present === false) return null;
   // size_pct is measured on vertical video, where height is the long side; the long side keeps a 16:9

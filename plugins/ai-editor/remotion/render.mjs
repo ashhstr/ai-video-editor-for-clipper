@@ -163,9 +163,9 @@ async function local(publicDir, planPath, out) {
   // to the video: the same path the GitHub join takes, sample-aligned with the cut.
   const tmp = out.replace(/\.mp4$/i, "") + ".tmp.mkv";
   await renderMedia({ serveUrl, composition, inputProps, codec: "h264-mkv", outputLocation: tmp,
-    enforceAudioTrack: true, concurrency: concurrency(), scale, ...hwOpts(composition, scale), timeoutInMilliseconds: TIMEOUT_MS,
+    enforceAudioTrack: true, concurrency: concurrency(), scale, crf: 14, ...hwOpts(composition, scale), timeoutInMilliseconds: TIMEOUT_MS,
     onProgress: progress(composition.durationInFrames) });
-  const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-i", tmp, "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+  const r = spawnSync("ffmpeg", ["-v", "error", "-y", "-i", tmp, "-c:v", "copy", "-c:a", "aac", "-b:a", "256k", "-ar", "48000",
     "-shortest", "-movflags", "+faststart", out], { stdio: "inherit" });
   fs.rmSync(tmp, { force: true });
   if (r.status !== 0) throw new Error(`ffmpeg could not write ${out}`);

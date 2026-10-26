@@ -1,0 +1,59 @@
+{
+  "handle": "ash-clips-orange",
+  "name": "Ash Clips Orange",
+  "sample": true,
+  "about": "High-retention talking-head video style reverse-engineered from Style_Editing_Ash_Clips.mp4. White/Black/Orange palette with 3-tier kinetic torso captions, blur-whip jump cuts, vertical-stripe dissolves, glass UI cards, and depth occlusion hero words.",
+  "format": "talking-head vertical video with kinetic torso typography, blur-whip transitions and glass cards",
+  "aspect": "9:16",
+  "layout": {
+    "mode": "vertical",
+    "ground": "#0A0A0A"
+  },
+  "card_kinds": [
+    "glass_card",
+    "rec_hud",
+    "focus_ring"
+  ],
+  "transitions": [
+    "blur_whip",
+    "stripes",
+    "hard_cut_ring"
+  ],
+  "motion": {
+    "engine": "hyperframes",
+    "amount": 1,
+    "look": "glass_hud",
+    "kinds": {
+      "counter": true,
+      "list": true,
+      "flow": true,
+      "before_after": true,
+      "ui_demo": true,
+      "curve": true,
+      "logo": true
+    }
+  },
+  "captions": {
+    "present": true,
+    "words_per_caption": 4,
+    "size_pct": 5.2,
+    "case": "title",
+    "font_match": "Inter Tight",
+    "weight": 900,
+    "color": "#FFFFFF",
+    "highlight_color": "#FF6A00",
+    "stroke": false,
+    "box": false,
+    "shadow": true,
+    "animation": "pop_glow",
+    "y_pct": 54.0
+  },
+  "graphics": {
+    "per_min": 12,
+    "kinds": {
+      "animation": 40,
+      "real screenshot": 30,
+      "logo": 30
+    }
+  }
+}

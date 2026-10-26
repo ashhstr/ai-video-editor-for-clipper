@@ -135,7 +135,12 @@ def fingerprint(edit, plan_path, plan):
 
 def prepare_public(edit, plan, tag):
     """A folder with only what the render reads: the cut at output size (keyframe every
-    15 frames, which keeps frame seeking fast) and the card images."""
+    15 frames, which keeps frame seeking fast) and the card images.
+
+    The proxy is encoded with no B-frames on a 90 kHz timescale on purpose: the
+    compositor extracts single frames by timestamp, and a B-frame needs the
+    reference frame before it, so a proxy that carries them fails mid-render with
+    "No frame found at position N". Short GOPs alone do not prevent it."""
     pub = edit / f".render{tag}"
     pub.mkdir(exist_ok=True)
     cut, proxy = edit / plan["video"], pub / plan["video"]
@@ -150,7 +155,8 @@ def prepare_public(edit, plan, tag):
         print(f"preparing {plan['width']}x{plan['height']} copy of {cut.name}", flush=True)
         subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(cut), "-filter_complex", vf,
                         "-c:v", "libx264", "-crf", "18", "-preset", "veryfast", "-g", "15",
-                        "-keyint_min", "15", "-sc_threshold", "0", "-pix_fmt", "yuv420p",
+                        "-keyint_min", "15", "-sc_threshold", "0", "-bf", "0",
+                        "-video_track_timescale", "90000", "-pix_fmt", "yuv420p",
                         "-c:a", "copy", str(proxy)], check=True)
         made.write_text(vf, encoding="utf-8")
     rels = public_rels(plan)
@@ -507,6 +513,49 @@ def render_chunks(edit, plan_path, pub, out, draft, log, stall, run=None, bundle
     print(f"rendered {out} in {len(pieces)} pieces")
 
 
+def render_concurrency():
+    """How many Chrome tabs the local render may open at once.
+
+    render.mjs defaults to one tab per core, right on a machine built for it and
+    wrong on a small one: each tab holds a decoded 1080x1920 frame plus a video
+    decoder, so on an 8 GB laptop the compositor runs out of memory part-way
+    through and dies with "No frame found at position N" on whichever frame it
+    happened to be decoding. Sizing this from RAM keeps the render slow but
+    finishable; a bigger machine still gets every core.
+    """
+    override = os.environ.get("AI_EDITOR_RENDER_CONCURRENCY")
+    if override:
+        try:
+            return max(1, int(override))
+        except ValueError:
+            pass
+    gb = 16.0
+    try:
+        import ctypes
+
+        class MEMORYSTATUSEX(ctypes.Structure):
+            _fields_ = [("dwLength", ctypes.c_ulong), ("dwMemoryLoad", ctypes.c_ulong),
+                        ("ullTotalPhys", ctypes.c_ulonglong), ("ullAvailPhys", ctypes.c_ulonglong),
+                        ("ullTotalPageFile", ctypes.c_ulonglong), ("ullAvailPageFile", ctypes.c_ulonglong),
+                        ("ullTotalVirtual", ctypes.c_ulonglong), ("ullAvailVirtual", ctypes.c_ulonglong),
+                        ("ullAvailExtendedVirtual", ctypes.c_ulonglong)]
+
+        st = MEMORYSTATUSEX()
+        st.dwLength = ctypes.sizeof(MEMORYSTATUSEX)
+        ctypes.windll.kernel32.GlobalMemoryStatusEx(ctypes.byref(st))
+        gb = st.ullTotalPhys / (1024 ** 3)
+    except Exception:
+        pass
+    cores = os.cpu_count() or 4
+    if gb >= 16:
+        return cores
+    if gb >= 12:
+        return max(1, cores // 2)
+    if gb >= 8:
+        return max(1, cores // 4)
+    return 2
+
+
 def render_laptop(edit, plan_path, pub, out, draft, run=None, chunks=None):
     t0 = time.time()
     frames = json.loads(plan_path.read_text(encoding="utf-8"))["durationInFrames"]
@@ -517,7 +566,8 @@ def render_laptop(edit, plan_path, pub, out, draft, run=None, chunks=None):
     stall, log = stall_s(spf), out.parent / f"{out.stem}.renderer.log"
     log.unlink(missing_ok=True)
     r = (run or watch)(["node", str(REMOTION / "render.mjs"), "local", str(pub), str(plan_path), str(out),
-                        *(["--draft"] if draft else [])], log, stall, cwd=REMOTION, env=aws_env())
+                        f"--concurrency={render_concurrency()}",
+                         *(["--draft"] if draft else [])], log, stall, cwd=REMOTION, env=aws_env())
     if r == STALLED:
         print(f"\nthe render stalled: no new frame for {stall:.0f} s. Stopped it; rendering again in "
               f"{CHUNK_FRAMES}-frame pieces (log: {log})", flush=True)

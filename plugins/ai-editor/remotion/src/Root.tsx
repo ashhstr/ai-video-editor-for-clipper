@@ -5,6 +5,7 @@ import { resolveLook, useFonts } from "./look";
 import { SplitText, pickMotion, useTl } from "./motion";
 import { footageX } from "./Scene";
 import { ProductVideo, ProductPlan, productMeta } from "./product/ProductVideo";
+import { AshClipsComposition } from "./ash_clips/AshClipsComposition";
 
 // Real values come from plan.json via --props; these only let the studio open.
 const empty: Plan = {
@@ -94,5 +95,14 @@ export const Root: React.FC = () => (
         brand: { ground: "#FFFFFF", ink: "#0A0A0A", muted: "#6B6B6B", accent: "#0A0A0A", dark: false, radius_px: 8,
           display: { family: "Inter", weight: 600, tracking_em: -0.02 }, body: { family: "Inter", weight: 400 }, fonts: [] },
         page: { vw: 1440, vh: 900, tiles: [], height: 900, domain: "" }, shots: [] } as ProductPlan} />
+    <Composition
+      id="AshClips"
+      component={AshClipsComposition}
+      width={1080}
+      height={1920}
+      fps={30}
+      durationInFrames={508}
+      defaultProps={{}}
+    />
   </>
 );
