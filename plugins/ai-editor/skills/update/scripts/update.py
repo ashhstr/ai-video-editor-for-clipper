@@ -308,7 +308,7 @@ def verify(repo):
         from ai_editor.run import venv_python
         py = str(venv_python()) if venv_python().exists() else sys.executable
     failed = [name for name, cmd in (("tests/check_plugins.py", [sys.executable, "tests/check_plugins.py"]),
-                                     ("tests/demos.sh", ["bash", "tests/demos.sh"]))
+                                     ("tests/demos.sh", [str(Path("C:/Program Files/Git/bin/bash.exe")) if os.name == "nt" and Path("C:/Program Files/Git/bin/bash.exe").exists() else "bash", "tests/demos.sh"]))
               if subprocess.run(cmd, cwd=repo, env={**os.environ, "PY": py}).returncode]
     if failed:
         print("FAILED: " + ", ".join(failed) + "\nFix them, or go back with: update.py rollback")

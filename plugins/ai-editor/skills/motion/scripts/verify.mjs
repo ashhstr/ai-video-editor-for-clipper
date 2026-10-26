@@ -30,7 +30,7 @@ function tools() {
   let puppeteer;
   try { puppeteer = req("puppeteer-core"); } catch { console.error("ERROR: the motion tools are not installed (setup.py motion)"); process.exit(2); }
   const bin = join(MOTION, "node_modules", ".bin", process.platform === "win32" ? "hyperframes.cmd" : "hyperframes");
-  const chrome = execFileSync(bin, ["browser", "path"], { encoding: "utf8" }).trim().split("\n").pop();
+  const chrome = execFileSync(bin, ["browser", "path"], { encoding: "utf8", shell: process.platform === "win32" }).trim().split("\n").pop();
   return { puppeteer, chrome };
 }
 

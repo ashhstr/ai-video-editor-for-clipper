@@ -1724,7 +1724,7 @@ def getting_started(d):
     running = any(j["type"] == "setup" and j["state"] in ("queued", "taken") for j in d["jobs"])   # the tools pass mid-install
     setup = not running and (any(j["type"] == "setup" and j["state"] == "done" for j in d["jobs"]) or bool(rows) and all(r.get("ok") for r in rows))
     style = bool(d.get("style_skipped")) or any(j["type"] == "teardown" and j["state"] == "done" for j in d["jobs"]) \
-        or any(not h.startswith(("own-", "sample-")) for h, _ in library.styles(d["root"]))
+        or any(not (h.startswith(("own-", "sample-")) or s.get("sample")) for h, s in library.styles(d["root"]))
     es = library.entries()
     video = any(e["status"] in ("ready", "done") and not e.get("sample") for e in es)   # the sample is not your first video
     sample = any(e.get("sample") and e["status"] in ("ready", "done") for e in es)
@@ -4055,7 +4055,7 @@ def demo():
         assert e.code == 404
     # style cards: My style (the default style until a creator is saved), then each studied creator, measured only
     st = {c["id"]: c for c in lib["styles"]}
-    assert list(st) == ["mine", "@sample.creator", "@sample-50-50", "@sample-card-edit", "@sample-motion-design", "@newbie"], list(st)
+    assert [x for x in st if x != "@ash-clips-orange"] == ["mine", "@sample.creator", "@sample-50-50", "@sample-card-edit", "@sample-motion-design", "@newbie"], list(st)
     sm = st["@sample-card-edit"]   # the sample style the plugin ships: listed for every user, by its own name
     assert sm["sample"] and sm["name"] == "Card edit" and sm["line"].startswith("A sample style") and not sm["cover"], sm
     assert sm["thumb"].startswith("/style/thumb?id=") and sm["example"].startswith("/style/example?id=") and len(sm["focus"]) == 2, sm

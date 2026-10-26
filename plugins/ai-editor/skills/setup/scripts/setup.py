@@ -1467,14 +1467,14 @@ def demo_install_all():
         def no_renderer(*a, **k):
             sys.exit("ERROR: drawing a test frame failed (exit 1); its output is above.")
         quiet = no_renderer
-        assert step_warm() == "skipped"
+        assert step_warm(force=True) == "skipped"
 
         def disk_full(*a, **k):
             raise OSError(28, "No space left on device")
         quiet = disk_full
         import glob as g
         before = set(g.glob(os.path.join(tempfile.gettempdir(), "ave-warm-*")))
-        assert step_warm() == "skipped" and set(g.glob(os.path.join(tempfile.gettempdir(), "ave-warm-*"))) == before
+        assert step_warm(force=True) == "skipped" and set(g.glob(os.path.join(tempfile.gettempdir(), "ave-warm-*"))) == before
         models.fetch = lambda *a, **k: sys.exit("ERROR: no connection")
         with tempfile.TemporaryDirectory() as d:
             keep_dir, models.DIR = models.DIR, Path(d)
