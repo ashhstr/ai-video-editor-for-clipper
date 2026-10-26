@@ -44,6 +44,7 @@ cut at reel speed reads as jumpy. The user's taste sets either one (`cut.max_pau
   camera, the deadpan), or before a reaction is the joke. Cut it and the line dies. Quote the words
   just before each one in `beats.json` (`shapes.md`) and that pause plays as said, up to 1.2 s. On a
   wide take, read every bit of comedy, sarcasm, a callback or an aside for these before you build.
+  *(Note for vertical 9:16 cuts: In AshftClippo, 16:9 horizontal timing and 1.2s comedy holds are permanently discarded. Short-form retention requires rhythmic momentum; all pauses are trimmed to 0.10s-0.25s via `--max-pause 0.15`).*
 - **Before a number or a reveal.** A short beat before a figure lets it land. Add it to `beats.json`.
 - **Inside a spoken list.** Very tight pauses between list items make them run together.
 

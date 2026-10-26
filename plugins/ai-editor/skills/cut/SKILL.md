@@ -102,7 +102,7 @@ cloud=Claude jiv=Jev` (whole words, kept in `fixes.json` for the captions).
 python3 "$S/build_timeline.py" <source> edits/<name> && python3 "$PY" "$S/mirror.py" <source> edits/<name>
 ```
 
-Pauses over 0.15 s (wide 0.30) shrink to 2/3, not `keep.json`/`beats.json` (editorial-rules.md);
+Pauses over 0.15 s (wide 0.30) shrink to 2/3, not `keep.json`/`beats.json` (editorial-rules.md; in AshftClippo vertical 9:16 cuts, 16:9 timing and 1.2s comedy holds are permanently discarded; `--max-pause 0.15` tightens pauses to 0.10s-0.25s);
 music: word gaps only. A build `ERROR` writes nothing: fix the span, rerun.
 
 `mirror.py` says `mirrored` when a book, shirt or sign reads backwards (a front-camera take): ask once,
