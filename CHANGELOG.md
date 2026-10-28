@@ -4,6 +4,9 @@ What changed for every user, newest first.
 
 ## Unreleased
 
+## ai-editor 2.7.29, creator-teardown 2.7.29 (2026-10-26)
+- On a trial reel (picked in the Version menu), the notes box works after the video is approved: "Note on t2 at this moment..." goes to that trial, and Claude answers on the Trial reels tab.
+
 ## ai-editor 2.7.28, creator-teardown 2.7.28 (2026-10-24)
 - One Claude control on the video page: a dot and what Claude is doing (working on your notes, waiting for your notes, open, or not running), with one button. Show Claude brings its Terminal window to the front; Start Claude carries on in the Claude that worked on the video. Copy for Claude, Copy session and Open a new Claude are gone.
 - A Claude page in the editor window lists every video's Claude with Show, Stop and Start, and the sidebar says how many are running. Stop closes that Claude; the video, notes and drafts stay.
